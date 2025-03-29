@@ -3,20 +3,26 @@ import json
 import logging
 import argparse
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+DEBUG = False
 
-COOKIES = "INSERT COOKIE HEADERS HERE"
+logging.basicConfig()
+if DEBUG:
+    logging.getLogger().setLevel(logging.DEBUG)
+else:
+    logging.getLogger().setLevel(logging.WARN)
+
+COOKIES = "PASTE CONTENTS OF YOUR COOKIE HEADERS HERE"
 
 def getHighestCharacterAndLP(character_league_infos):
     highestCharacter = ""
     highestLP = -2
     for character in character_league_infos:
-        # print(f"Investigating character {character['character_id']}, {character['character_name']}")
-        # print(f"... LP for this character is {character['league_info']['league_point']}")
+        logging.debug(f"Investigating character {character['character_id']}, {character['character_name']}, LP for this character is {character['league_info']['league_point']}")
         if character['league_info']['league_point'] > highestLP:
             highestLP = character['league_info']['league_point']
             highestCharacter = character['character_name']
+
+    logging.debug(f"Highest character is {highestCharacter} with LP of {highestLP}")
 
     return (highestCharacter, highestLP)
 
@@ -49,11 +55,12 @@ def retrieveLeagueInfo(capcomId: int):
         'POST',
         '/6/buckler/api/profile/play/act/leagueinfo',
         json.dumps(json_data),
-        # '{"targetShortId":1681090405,"targetSeasonId":-1,"locale":"en","peak":true}',
         headers
     )
     response = conn.getresponse()
     data = json.loads(response.read())
+
+    logging.debug(f"Buckler data retrieval response: {response.status}")
 
     highestCharacter, highestLP = getHighestCharacterAndLP(data['response']['character_league_infos'])
     print(f"For CID {capcomId}, highest character is {highestCharacter} with LP of {highestLP}")
