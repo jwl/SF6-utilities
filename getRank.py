@@ -6,7 +6,7 @@ import argparse
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 
-COOKIE = "INSERT COOKIE HERE"
+COOKIES = "INSERT COOKIE HEADERS HERE"
 
 def getHighestCharacterAndLP(character_league_infos):
     highestCharacter = ""
@@ -32,7 +32,7 @@ def retrieveLeagueInfo(capcomId: int):
         'Origin': 'https://www.streetfighter.com',
         'DNT': '1',
         'Connection': 'keep-alive',
-        'Cookie': COOKIE,
+        'Cookie': COOKIES,
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-origin',
