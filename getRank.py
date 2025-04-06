@@ -11,20 +11,32 @@ if DEBUG:
 else:
     logging.getLogger().setLevel(logging.WARN)
 
-COOKIES = "PASTE CONTENTS OF YOUR COOKIE HEADERS HERE"
+COOKIES = "CookieConsent={stamp:%27H+kbT3MrW7Jz7UDWRJZ/XAXATRAGlFm1ZE0lJThPTRgEapq8hnPSMA==%27%2Cnecessary:true%2Cpreferences:true%2Cstatistics:true%2Cmarketing:true%2Cmethod:%27explicit%27%2Cver:3%2Cutc:1712433407589%2Cregion:%27ca%27}; _ga_LZJGXR1W9E=GS1.1.1743264470.274.1.1743264471.0.0.0; _ga_4BKH6S3JTF=GS1.1.1743264470.139.1.1743264471.59.0.0; _ga=GA1.1.1988350405.1712693624; _ga_4BKH6S3JTF=deleted; __td_signed=true; _ga_B8S45G09HL=GS1.1.1736809966.13.1.1736810033.58.0.0; _gsid=e8776be1b1ca4d4b81aa5a0aede76eda; _tt_enable_cookie=1; _ttp=LIiV85VUR7DkC5eyX4s93yNhiDa.tt.1; _gcl_au=1.1.1228596969.1736441751; _td=a182f550-f748-47c1-8064-a9bd0df28cd4; buckler_r_id=b28a914c-5fc5-4371-94b9-a631ecbe5a59; buckler_id=EQ4PsPkd6IFwAaV5l8l2AIsf9ahx3LE9RPzBHtOV-HndB2vYoBZ5uhP8cDhgzmBb; buckler_praise_date=1743207776537"
+
+
+def getMR(character_league_infos):
+    return -1
+
 
 def getHighestCharacterAndLP(character_league_infos):
-    highestCharacter = ""
+    highestLPCharacter = ""
     highestLP = -2
+    highestMRCharacter = ""
+    highestMR = 0
     for character in character_league_infos:
         logging.debug(f"Investigating character {character['character_id']}, {character['character_name']}, LP for this character is {character['league_info']['league_point']}")
         if character['league_info']['league_point'] > highestLP:
             highestLP = character['league_info']['league_point']
-            highestCharacter = character['character_name']
+            highestLPCharacter = character['character_name']
+        if character['league_info']['master_rating'] > highestMR:
+            highestMR = character['league_info']['master_rating']
+            highestMRCharacter = character['character_name']
 
-    logging.debug(f"Highest character is {highestCharacter} with LP of {highestLP}")
+    logging.debug(f"Highest character is {highestLPCharacter} with LP of {highestLP}")
+    if highestLP > 25000:
+        logging.debug(f"Master character detected. Highest MR rated character for this account is {highestMRCharacter} at MR of {highestMR}")
 
-    return (highestCharacter, highestLP)
+    return (highestLPCharacter, highestLP, highestMRCharacter, highestMR)
 
 
 def retrieveLeagueInfo(capcomId: int):
@@ -62,8 +74,16 @@ def retrieveLeagueInfo(capcomId: int):
 
     logging.debug(f"Buckler data retrieval response: {response.status}")
 
-    highestCharacter, highestLP = getHighestCharacterAndLP(data['response']['character_league_infos'])
-    print(f"For CID {capcomId}, highest character is {highestCharacter} with LP of {highestLP}")
+    highestCharacter, highestLP, highestMRCharacter, highestMR = getHighestCharacterAndLP(data['response']['character_league_infos'])
+    if highestLP < 25000:
+        print(f"For CID {capcomId}, highest character is {highestCharacter} with LP of {highestLP}")
+    elif highestMR > 0:
+        print(f"For CID {capcomId}, highest character is {highestCharacter} with LP of {highestLP}.")
+        print(f"Master rank detected! Highest MR character this season is {highestMRCharacter}, with MR of {highestMR}" )
+    else:
+        print(f"For CID {capcomId}, highest character is {highestCharacter} with LP of {highestLP}")
+        print("Master rank detected! However, they have not played any games on their Master Ranked characters and have no MR this season." )
+        
 
 
 def main():
